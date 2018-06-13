@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import argparse
 from codecs import open
 import json
-import datetime   
+import datetime
 import os
 import time
 import pyaudio
@@ -27,23 +27,22 @@ DATE_FORMAT = '%Y_%m_%dT%H_%M_%S'
 
 def record_one(directory, i):
     dest_path = os.path.join(directory, "{0}.wav".format(i))
-    
+
     audio = pyaudio.PyAudio()
 
-    raw_input(
-        """\n\nPress enter to record one sample, say your hotword when "recording..." shows up""")
+    input("""\n\nPress enter to record one sample, say your hotword when "recording..." shows up""")
     time.sleep(0.5)
 
     stream = audio.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
                         frames_per_buffer=CHUNK)
-    print "recording..."
+    print("recording...")
     frames = []
 
     for j in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
         data = stream.read(CHUNK)
         frames.append(data)
-    print "finished recording\n"
+    print("finished recording\n")
 
     stream.stop_stream()
     stream.close()
@@ -59,14 +58,11 @@ def record_one(directory, i):
 
 def check_audios(durations):
     if any([d > MAX_RECORD_DURATION for d in durations]):
-        print "WARNING: at least one your record seems to have a too long " \
-              "duration, you are going to have"
+        print("WARNING: at least one your record seems to have a too long\nduration, you are going to have")
 
 
 def record_and_trim(hotword_key, nb_records=3):
-    raw_input("Your will have to record your personal hotword." \
-              " Please be sure to be in a quiet environment." \
-              " Press enter once you are ready.\n".format(
+    input("Your will have to record your personal hotword.\n Please be sure to be in a quiet environment.\nPress enter once you are ready.\n".format(
         nb_records))
 
     directory = os.path.join(FOLDER_BASE, "personal_{0}".format(str(datetime.datetime.now().strftime(DATE_FORMAT))))
@@ -81,9 +77,7 @@ def record_and_trim(hotword_key, nb_records=3):
             audio = Audio.from_file(dest_path)
             audio.trim_silences(SNR_TRIM)
             while audio.duration() > MAX_RECORD_DURATION:
-                print "WARNING: there seems to be too much noise in your" \
-                      " environment please retry to record this sample by " \
-                      "following the instructions."
+                print("WARNING: there seems to be too much noise in your\nenvironment please retry to record this sample by\nfollowing the instructions.")
                 record_one(directory, i)
                 audio = Audio.from_file(dest_path)
                 audio.trim_silences(SNR_TRIM)
@@ -93,9 +87,7 @@ def record_and_trim(hotword_key, nb_records=3):
                         audio_1.duration() - audio_2.duration()) > MAX_DIFFERENCE_DURATION
                 for i, audio_1 in enumerate(audios) for j, audio_2 in
                 enumerate(audios) if i < j]):
-            print "WARNING: there seems to be too much difference between " \
-                  "your records please retry to record all of them by following " \
-                  "the instructions."
+            print("WARNING: there seems to be too much difference between\nyour records please retry to record all of them by following\nthe instructions.")
         else:
             is_validated = True
 
@@ -127,11 +119,11 @@ def record_and_trim(hotword_key, nb_records=3):
         "preemphasis_coefficient": 0.97
     }
 
-    with open(os.path.join(directory, "config.json"), "wb") as f:
+    with open(os.path.join(directory, "config.json"), "w") as f:
         json.dump(config, f, indent=4)
 
-    print "Your model has been saved in {0}".format(
-        os.path.join(os.path.dirname(os.path.realpath(__file__)), directory))
+    print("Your model has been saved in {0}".format(
+        os.path.join(os.path.dirname(os.path.realpath(__file__)), directory)))
 
 
 if __name__ == "__main__":
